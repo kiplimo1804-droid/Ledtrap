@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ledtrap - Social Platform & Shorts</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full text-slate-800 font-sans antialiased selection:bg-brand-500 selection:text-white">
+    <div id="app" class="min-h-full flex flex-col">
+        <!-- Navigation Header -->
+        <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-2 cursor-pointer" onclick="resetFilters()">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 via-purple-600 to-brand-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                        <i class="fa-solid fa-bolt text-xl"></i>
+                    </div>
+                    <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-rose-600 to-brand-600 hidden sm:inline">ledtrap</span>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl">
+                    <button id="nav-feed-btn" onclick="switchMainTab('feed')" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-xs transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-newspaper text-brand-600"></i> Feed
+                    </button>
+                    <button id="nav-shorts-btn" onclick="switchMainTab('shorts')" class="px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-clapperboard text-rose-500"></i> Shorts
+                    </button>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="flex-1 max-w-xs relative hidden sm:block">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                    </div>
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        oninput="handleSearch(this.value)"
+                        placeholder="Search ledtrap..." 
+                        class="w-full pl-10 pr-4 py-2 bg-slate-100 hover:bg-slate-100/80 focus:bg-white border border-transparent focus:border-brand-500 rounded-full text-sm transition-all focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                    >
+                </div>
+
+                <!-- User Profile & Action -->
+                <div class="flex items-center gap-3">
+                    <button onclick="openCreateModal()" class="flex items-center gap-2 bg-gradient-to-r from-rose-500 to-brand-600 hover:from-rose-600 hover:to-brand-700 active:scale-95 text-white px-4 py-2 rounded-full font-medium text-sm transition-all shadow-sm shadow-brand-600/30">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="hidden sm:inline">Create</span>
+                    </button>
+                    <div class="h-8 w-px bg-slate-200"></div>
+                    <div class="flex items-center gap-2 cursor-pointer p-1 rounded-full hover:bg-slate-100 transition-colors">
+                        <img id="currentUserAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" alt="User Avatar" class="w-9 h-9 rounded-full object-cover ring-2 ring-brand-500/30">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Layout Container -->
+        <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- Left Sidebar Navigation -->
+            <aside class="hidden lg:block lg:col-span-1 space-y-6">
+                <!-- User Profile Summary Card -->
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+                    <div class="flex flex-col items-center text-center">
+                        <img id="sideUserAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" class="w-16 h-16 rounded-full object-cover ring-4 ring-slate-50 mb-3 shadow">
+                        <h3 class="font-semibold text-slate-900" id="sideUserName">Alex Morgan</h3>
+                        <p class="text-xs text-slate-500 mb-3" id="sideUserHandle">@alexmorgan</p>
+                        <p class="text-xs text-slate-600 px-2 mb-4">Digital Creator & Tech Enthusiast on ledtrap.</p>
+                        <div class="w-full grid grid-cols-3 gap-2 py-2 border-t border-slate-100 text-center text-xs">
+                            <div>
+                                <span class="block font-bold text-slate-900" id="userPostCount">0</span>
+                                <span class="text-slate-400">Posts</span>
+                            </div>
+                            <div>
+                                <span class="block font-bold text-slate-900">1.4k</span>
+                                <span class="text-slate-400">Followers</span>
+                            </div>
+                            <div>
+                                <span class="block font-bold text-slate-900">382</span>
+                                <span class="text-slate-400">Following</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feed & Content Mode Filters -->
+                <div class="bg-white rounded-2xl p-3 border border-slate-200/80 shadow-sm space-y-1">
+                    <button onclick="setFilter('all')" id="filter-all" class="filter-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-600 bg-brand-50 transition-colors">
+                        <i class="fa-solid fa-globe w-5"></i> Main Feed
+                    </button>
+                    <button onclick="switchMainTab('shorts')" id="filter-shorts" class="filter-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                        <i class="fa-solid fa-circle-play w-5 text-rose-500"></i> Shorts Video Feed
+                    </button>
+                    <button onclick="setFilter('trending')" id="filter-trending" class="filter-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                        <i class="fa-solid fa-fire w-5 text-amber-500"></i> Trending
+                    </button>
+                    <button onclick="setFilter('mine')" id="filter-mine" class="filter-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                        <i class="fa-solid fa-user w-5 text-indigo-500"></i> My Posts
+                    </button>
+                    <button onclick="setFilter('saved')" id="filter-saved" class="filter-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                        <i class="fa-solid fa-bookmark w-5 text-emerald-500"></i> Saved Posts
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Feed Column -->
+            <section class="lg:col-span-3 space-y-5">
+                <!-- Mobile Feed Filter Nav -->
+                <div class="lg:hidden flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                    <button onclick="switchMainTab('feed')" id="m-nav-feed" class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap bg-brand-600 text-white shadow-sm">📰 Feed</button>
+                    <button onclick="switchMainTab('shorts')" id="m-nav-shorts" class="px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap bg-white text-slate-600 border border-slate-200">🎬 Shorts</button>
+                    <button onclick="setFilter('trending')" id="m-filter-trending" class="m-filter-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap bg-white text-slate-600 border border-slate-200">🔥 Trending</button>
+                    <button onclick="setFilter('mine')" id="m-filter-mine" class="m-filter-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap bg-white text-slate-600 border border-slate-200">👤 Mine</button>
+                </div>
+
+                <!-- MAIN POSTS FEED TAB -->
+                <div id="mainFeedView" class="space-y-5">
+                    <!-- Quick Post Creation Box -->
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+                        <div class="flex gap-3">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" class="w-10 h-10 rounded-full object-cover">
+                            <button onclick="openCreateModal('post')" class="flex-1 text-left bg-slate-100 hover:bg-slate-200/70 text-slate-400 px-4 py-2.5 rounded-full text-sm transition-colors">
+                                Share a post or video on ledtrap...
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Posts List Container -->
+                    <div id="postsContainer" class="space-y-5">
+                        <!-- Dynamic Posts Rendered Here -->
+                    </div>
+                </div>
+
+                <!-- SHORTS VIDEO FEED TAB -->
+                <div id="shortsFeedView" class="hidden flex justify-center py-2">
+                    <div id="shortsContainer" class="w-full max-w-md space-y-6">
+                        <!-- Dynamic Shorts Rendered Here -->
+                    </div>
+                </div>
+
+                <!-- Empty Feed State -->
+                <div id="emptyState" class="hidden bg-white rounded-2xl p-12 text-center border border-slate-200/80 shadow-sm">
+                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-2xl mx-auto mb-3">
+                        <i class="fa-solid fa-newspaper"></i>
+                    </div>
+                    <h3 class="text-base font-semibold text-slate-800">No posts found</h3>
+                    <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Try adjusting your filter or search criteria, or be the first to share something on ledtrap!</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- CREATE MODAL (POST / SHORT) -->
+    <div id="createModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl transform transition-all scale-95 opacity-0 duration-200" id="createModalContent">
+            <!-- Modal Header -->
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex gap-2">
+                    <button id="modalTabPostBtn" onclick="toggleCreateModalType('post')" class="font-bold text-sm text-brand-600 bg-brand-50 px-3 py-1 rounded-lg">Create Post</button>
+                    <button id="modalTabShortBtn" onclick="toggleCreateModalType('short')" class="font-semibold text-sm text-slate-500 hover:text-slate-800 px-3 py-1 rounded-lg">Create Short</button>
+                </div>
+                <button onclick="closeCreateModal()" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <!-- Modal Form -->
+            <form id="createPostForm" onsubmit="handleCreateContent(event)" class="p-5 space-y-4">
+                <input type="hidden" id="contentTypeInput" value="post">
+                <div class="flex items-center gap-3 mb-2">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" class="w-9 h-9 rounded-full object-cover">
+                    <div>
+                        <span class="font-semibold text-sm block text-slate-900">Alex Morgan</span>
+                        <span class="text-xs text-slate-400">Posting to ledtrap</span>
+                    </div>
+                </div>
+
+                <textarea 
+                    id="postContent" 
+                    rows="3" 
+                    required 
+                    placeholder="What's on your mind? Add caption, tags like #ledtrap..."
+                    class="w-full text-sm text-slate-800 placeholder-slate-400 border-0 focus:ring-0 resize-none outline-none p-0"
+                ></textarea>
+
+                <!-- Media Input & File Drag/Drop Area -->
+                <div id="mediaInputContainer" class="space-y-3 pt-2 border-t border-slate-100">
+                    <div class="flex gap-2">
+                        <!-- Direct Local File Selector Button -->
+                        <label class="flex-1 cursor-pointer flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 hover:border-brand-500 hover:bg-slate-50 text-slate-600 rounded-xl p-3 text-xs font-semibold transition-all">
+                            <i class="fa-solid fa-cloud-arrow-up text-base text-brand-600"></i>
+                            <span id="fileUploadLabel">Upload File from Device</span>
+                            <input type="file" id="localFileInput" accept="image/*,video/*" onchange="handleLocalFileSelect(event)" class="hidden">
+                        </label>
+                    </div>
+
+                    <!-- Web URL Input Alternative -->
+                    <div class="relative">
+                        <input 
+                            type="url" 
+                            id="postMediaUrl" 
+                            placeholder="Or paste image/video URL link..." 
+                            oninput="previewPostMedia(this.value)"
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none"
+                        >
+                    </div>
+
+                    <!-- Media Preview Area -->
+                    <div id="mediaPreview" class="hidden relative rounded-xl overflow-hidden max-h-56 bg-slate-950 flex items-center justify-center">
+                        <img id="imgPreviewTag" src="" class="w-full max-h-56 object-contain hidden">
+                        <video id="videoPreviewTag" src="" class="w-full max-h-56 object-contain hidden" controls></video>
+                        <button type="button" onclick="removeMediaPreview()" class="absolute top-2 right-2 bg-slate-900/80 hover:bg-slate-900 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs backdrop-blur-sm z-10 shadow">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Toolbar -->
+                <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                    <div class="flex items-center gap-1">
+                        <button type="button" onclick="insertHashtag()" class="text-slate-500 hover:text-brand-600 hover:bg-brand-50 p-2 rounded-xl text-sm transition-colors flex items-center gap-1.5 font-medium">
+                            <i class="fa-solid fa-hashtag text-indigo-500 text-base"></i> Tag
+                        </button>
+                    </div>
+                    <button type="submit" class="bg-gradient-to-r from-rose-500 to-brand-600 hover:from-rose-600 hover:to-brand-700 text-white px-5 py-2 rounded-xl font-medium text-sm transition-all shadow-md shadow-brand-600/20">
+                        Publish to ledtrap
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SHARE MODAL -->
+    <div id="shareModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-share-nodes text-brand-600"></i> Share via ledtrap
+                </h3>
+                <button onclick="closeShareModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-500">Copy link or share to your favorite social networks.</p>
+            <div class="grid grid-cols-4 gap-3 text-center py-2">
+                <button onclick="triggerShareAction('Twitter')" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 text-slate-700 transition-colors">
+                    <div class="w-10 h-10 rounded-full bg-sky-100 text-sky-500 flex items-center justify-center text-lg"><i class="fa-brands fa-x-twitter"></i></div>
+                    <span class="text-[11px] font-medium">X</span>
+                </button>
+                <button onclick="triggerShareAction('Facebook')" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 text-slate-700 transition-colors">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-lg"><i class="fa-brands fa-facebook-f"></i></div>
+                    <span class="text-[11px] font-medium">Facebook</span>
+                </button>
+                <button onclick="triggerShareAction('LinkedIn')" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 text-slate-700 transition-colors">
+                    <div class="w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center text-lg"><i class="fa-brands fa-linkedin-in"></i></div>
+                    <span class="text-[11px] font-medium">LinkedIn</span>
+                </button>
+    
